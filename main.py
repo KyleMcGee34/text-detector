@@ -10,4 +10,4 @@ if analyze:
     # Call the function from the other script
     final_label = analyze_text(text)
 
-    st.write(final_label)
+    st.write("The text you provided is assumed to be ", final_label)
