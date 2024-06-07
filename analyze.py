@@ -35,6 +35,19 @@ def get_model(path):
     loadedModel = tf.keras.models.load_model(path)
     return loadedModel
 
+@st.cache_resource
+def load_tokenizer(path):
+    with open(path) as f: 
+        data = json.load(f) 
+        tokenizer = tf.keras.preprocessing.text.tokenizer_from_json(data)
+    return tokenizer
+
+@st.cache_resource
+def load_parms(path):
+    with open(path, 'r') as json_file:
+        parm_dict = json.load(json_file)
+    return parm_dict
+
 def analyze_text(text):
     # create dataframe
     data = {'text': [text]}
@@ -50,12 +63,9 @@ def analyze_text(text):
     predict_df['text'] = predict_df['text'].apply(lowercase_text)
 
     # Load tokenizer
-    with open('Models/ProfileTextDetector/Tokenizer.json') as f: 
-        data = json.load(f) 
-        loaded_tokenizer = tf.keras.preprocessing.text.tokenizer_from_json(data)
+    loaded_tokenizer = load_tokenizer('Models/ProfileTextDetector/Tokenizer.json')
     # Load parms
-    with open('Models/ProfileTextDetector/Parms.json', 'r') as json_file:
-        loaded_parm_dict = json.load(json_file)
+    loaded_parm_dict = load_parms('Models/ProfileTextDetector/Parms.json')
     # Load model
     loaded_model = get_model('Models/ProfileTextDetector/Model.keras')
 
