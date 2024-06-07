@@ -21,6 +21,7 @@ def replace_numerical_values(text, token='<NUM>'):
     
     return preprocessed_text
 
+# Function to lowercase all text
 def lowercase_text(text):
     # Split the text into words
     words = text.split()
@@ -49,16 +50,14 @@ def load_parms(path):
     return parm_dict
 
 def analyze_text(text):
-    # create dataframe
+    # Create dataframe
     data = {'text': [text]}
     predict_df = pd.DataFrame(data)
 
-    # remove stop words
+    #Rremove stop words
     predict_df['text'] = predict_df['text'].apply(lambda x: ' '.join([word for word in x.split() if word not in (stop_words)]))
-
     # Convert numbers to <NUM>
     predict_df['text'] = predict_df['text'].apply(replace_numerical_values)
-    
     # Lower case everything
     predict_df['text'] = predict_df['text'].apply(lowercase_text)
 
@@ -69,13 +68,16 @@ def analyze_text(text):
     # Load model
     loaded_model = get_model('Models/ProfileTextDetector/Model.keras')
 
+    # Process text before prediction
     predict_texts = predict_df['text'].tolist()
-
     predict_sequences = loaded_tokenizer.texts_to_sequences(predict_texts)
     max_length = loaded_parm_dict['padding_value']
     predict_padded_sequences  = np.array(tf.keras.preprocessing.sequence.pad_sequences(predict_sequences, maxlen=max_length, padding='post'))
+    # Prediction starts here
     predicted_probability = loaded_model.predict(predict_padded_sequences)
+    # Convert prediction to int
     predicted_label = (predicted_probability > 0.5).astype(int)
+    # Return final output
     scalar_value = predicted_label[0, 0]
     if scalar_value == 1:
         final_label = 'Human'
