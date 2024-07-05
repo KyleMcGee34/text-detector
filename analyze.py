@@ -49,7 +49,7 @@ def load_parms(path):
         parm_dict = json.load(json_file)
     return parm_dict
 
-
+@st.cache_data
 def analyze_text(text):
     # Create dataframe
     data = {'text': [text]}
