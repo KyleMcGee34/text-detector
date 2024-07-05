@@ -1,1 +1,1 @@
-{"padding_value": 150, "embedding_value": 200, "drop_rate": 0.5, "l2_regularization": 0.01}
+{"padding_value": 175, "embedding_value": 50, "drop_rate": 0.8, "l2_regularization": 0.01}

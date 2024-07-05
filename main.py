@@ -2,6 +2,7 @@ import streamlit as st
 import subprocess
 import os
 import csv
+import re
 from analyze import analyze_text
 
 st.title('Text Detector Model')
@@ -24,13 +25,15 @@ if st.session_state.stage == 0:
             with open(csv_file_path, mode='a', newline='') as file:
                 writer = csv.writer(file)
                 # Write the row of data
-                writer.writerow([text, st.session_state.correct, st.session_state.save])
+                save_text = re.sub(r'\n+', ' ', text)
+                writer.writerow([save_text, st.session_state.correct, st.session_state.final_label])
             st.session_state.save = 'No'
             st.session_state.correct = 'No'
     st.button('Analyze text', on_click=set_state, args=[1])
 
 if st.session_state.stage >= 1:
     final_label = analyze_text(text)
+    st.session_state.final_label = final_label
     st.write("The text you provided is assumed to be --->", final_label, "<---")
     correct = st.radio('Was the models prediction correct?',
                        ['Yes','No','Not Sure'],
