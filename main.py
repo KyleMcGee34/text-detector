@@ -34,7 +34,9 @@ if st.session_state.stage == 0:
 if st.session_state.stage >= 1:
     final_label = analyze_text(text)
     st.session_state.final_label = final_label
-    st.write("The text you provided is assumed to be --->", final_label, "<---")
+    # st.write(f"temprature: :blue[{temperature}]")
+    st.write(f"The text you provided is assumed to be :blue-background[{final_label}]")
+    # st.write("The text you provided is assumed to be --->", final_label, "<---")
     correct = st.radio('Was the models prediction correct?',
                        ['Yes','No','Not Sure'],
                        index=None)
