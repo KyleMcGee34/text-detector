@@ -54,4 +54,5 @@ if st.session_state.stage >= 3:
     st.write('Thank you!')
     st.session_state.save = save
     st.session_state.correct = correct
+    st.cache_data.clear()
     st.button('Start Over', on_click=set_state, args=[0])
