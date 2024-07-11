@@ -6,6 +6,21 @@ import re
 from analyze import analyze_text
 
 st.title('Text Detector Model')
+with st.expander("Model Details", icon="🚨"):
+    st.write('''
+        This model is trained on synthetic and human written profiles. 
+        These were the synthetic models used: 
+             
+            - Llama-2-13B-GPTQ
+             
+            - EleutherAI_gpt-j-6B
+             
+            - facebook_galactica-6.7b
+             
+            - facebook_opt-6.7b
+             
+            - gpt2-xl
+    ''')
 text = st.text_area("Text to analyze")
 
 if 'stage' not in st.session_state:
@@ -22,6 +37,7 @@ def set_state(i):
 if st.session_state.stage == 0:
     if st.session_state.save == 'Yes':
         if text and st.session_state.correct and st.session_state.save:
+            st.cache_data.clear()
             with open(csv_file_path, mode='a', newline='') as file:
                 writer = csv.writer(file)
                 # Write the row of data
@@ -52,5 +68,7 @@ if st.session_state.stage >= 3:
     st.write('Thank you!')
     st.session_state.save = save
     st.session_state.correct = correct
-    st.cache_data.clear()
-    st.button('Start Over', on_click=set_state, args=[0])
+    if st.session_state.save == 'Yes':
+        st.button('Submit', on_click=set_state, args=[0])
+    if st.session_state.save == 'No':
+        st.button('Clear Selections', on_click=set_state, args=[0])
