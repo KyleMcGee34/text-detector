@@ -4,12 +4,17 @@ import os
 import csv
 import re
 from analyze import analyze_text
+import pandas as pd
 
 st.title('Text Detector Model')
 with st.expander("Model Details", icon="🚨"):
+    data = [['1139', 'Synthetic'], ['1081', 'Human']]
+    df = pd.DataFrame(data, columns=['Count', 'Type'])
+    st.write('Training data counts:')
+    st.dataframe(df,hide_index=True)
     st.write('''
         This model is trained on synthetic and human written profiles. 
-        These were the synthetic models used: 
+        These were the models used in training: 
              
             - Llama-2-13B-GPTQ
              
