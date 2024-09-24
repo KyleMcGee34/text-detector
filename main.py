@@ -8,7 +8,7 @@ import pandas as pd
 
 st.title('Text Detector Model')
 with st.expander("Model Details", icon="🚨"):
-    data = [['1139', 'Synthetic'], ['1081', 'Human']]
+    data = [['1786', 'Synthetic'], ['1747', 'Human']]
     df = pd.DataFrame(data, columns=['Count', 'Type'])
     st.write('Training data counts:')
     st.dataframe(df,hide_index=True)
@@ -25,6 +25,14 @@ with st.expander("Model Details", icon="🚨"):
             - facebook_opt-6.7b
              
             - gpt2-xl
+             
+            - LoneStriker_dolphin-2.5-mixtral-8x7b-6.0bpw-h6-exl2-2
+             
+            - TB_Psyfighter-13B-GPTQ
+             
+            - TB_neural-chat-7B-v3-3-GPTQ
+             
+            -
     ''')
 text = st.text_area("Text to analyze")
 
