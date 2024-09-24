@@ -31,8 +31,6 @@ with st.expander("Model Details", icon="🚨"):
             - TB_Psyfighter-13B-GPTQ
              
             - TB_neural-chat-7B-v3-3-GPTQ
-             
-            -
     ''')
 text = st.text_area("Text to analyze")
 
