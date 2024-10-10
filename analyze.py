@@ -42,7 +42,7 @@ def load_tokenizer(path):
         data = json.load(f) 
         tokenizer = tf.keras.preprocessing.text.tokenizer_from_json(data)
     return tokenizer
-
+\
 @st.cache_resource
 def load_parms(path):
     with open(path, 'r') as json_file:
@@ -76,6 +76,8 @@ def analyze_text(text):
     predict_padded_sequences  = np.array(tf.keras.preprocessing.sequence.pad_sequences(predict_sequences, maxlen=max_length, padding='post'))
     # Prediction starts here
     predicted_probability = loaded_model.predict(predict_padded_sequences)
+    st.progress(text=f"Human Likelihood :red-background[{round(predicted_probability[0, 0] * 100, 1)}%]",value=int(predicted_probability[0, 0] * 100))
+    st.progress(text=f"Synthetic Likelihood :red-background[{round((1 - predicted_probability[0, 0]) * 100, 1)}%]",value=int((1 - predicted_probability[0, 0]) * 100))
     # Convert prediction to int
     predicted_label = (predicted_probability > 0.5).astype(int)
     # Return final output
