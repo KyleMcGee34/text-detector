@@ -34,7 +34,7 @@ matplotlib==3.9.1
 mdurl==0.1.2
 mkl-service
 mkl_fft
-mkl_random==1.2.7
+mkl_random
 ml-dtypes==0.3.2
 namex==0.0.8
 nltk==3.8.1
