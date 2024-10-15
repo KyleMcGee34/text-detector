@@ -7,6 +7,8 @@ import json
 import numpy as np
 import pandas as pd
 import streamlit as st
+from sklearn.metrics import confusion_matrix, accuracy_score, roc_auc_score, ConfusionMatrixDisplay, classification_report, roc_curve, auc
+import matplotlib.pyplot as plt
 
 nltk.download('stopwords')
 stop_words = set(stopwords.words('english'))
@@ -86,5 +88,87 @@ def analyze_text(text):
         final_label = 'Human'
     if scalar_value == 0:
         final_label = 'Synthetic'
-
     return final_label
+
+def processNewDataWithLabels(textColumn, targetColumn, onlyOne=False, predict_df=None, plotROC=True):
+
+    predict_df = predict_df.rename(columns={textColumn: "text"})
+    predict_df = predict_df.rename(columns={targetColumn: "target"})
+
+    # Remove stop words
+    predict_df['text'] = predict_df['text'].apply(lambda x: ' '.join([word for word in x.split() if word not in (stop_words)]))
+    # Convert numbers to <NUM>
+    predict_df['text'] = predict_df['text'].apply(replace_numerical_values)
+    # Lower case everything
+    predict_df['text'] = predict_df['text'].apply(lowercase_text)
+
+    predict_texts = predict_df['text'].tolist()
+    predict_labels = np.array(predict_df['target'].tolist())
+
+    # Tokenization
+    loaded_tokenizer = load_tokenizer('Models/ProfileTextDetector/Tokenizer.json')
+    predict_sequences = loaded_tokenizer.texts_to_sequences(predict_texts)
+
+    # Padding
+    loaded_parm_dict = load_parms('Models/ProfileTextDetector/Parms.json')
+    max_length = loaded_parm_dict['padding_value']
+    predict_padded_sequences  = np.array(tf.keras.preprocessing.sequence.pad_sequences(predict_sequences, maxlen=max_length, padding='post'))
+
+    # Get the predicted probabilities for each class
+    loaded_model = get_model('Models/ProfileTextDetector/Model.keras')
+    predicted_probabilities = loaded_model.predict(predict_padded_sequences)
+
+    # Convert the predicted probabilities to class labels (0 or 1)
+    predicted_labels = (predicted_probabilities > 0.5).astype(int)
+
+    # Generate the confusion matrix
+    cm = confusion_matrix(predict_labels, predicted_labels)
+
+    accuracy = accuracy_score(predict_labels, predicted_labels)
+    st.write(f"Model Accuracy: {round(accuracy * 100, 2)}%")
+
+    # Plot the confusion matrix
+    if not onlyOne:
+        disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[0, 1])
+        disp.plot(cmap=plt.cm.Blues)
+        plt.xlabel("Predicted labels")
+        plt.ylabel("True labels")
+        plt.title("Confusion Matrix")
+        # plt.show()
+        cmPlot = plt.gcf()
+
+    if plotROC:
+        # Extract the probabilities for the positive class
+        positive_class_probabilities = predicted_probabilities[:, 0]  # Use index 0 to extract probabilities for the positive class
+
+        # Calculate the false positive rate (fpr) and true positive rate (tpr) for different thresholds
+        fpr, tpr, thresholds = roc_curve(predict_labels, positive_class_probabilities)
+
+        # Calculate the area under the ROC curve (AUC)
+        roc_auc = auc(fpr, tpr)
+
+        # Plot the ROC curve
+        plt.figure(figsize=(8, 6))
+        plt.plot(fpr, tpr, color='blue', lw=2, label='ROC curve (area = %0.2f)' % roc_auc)
+        plt.plot([0, 1], [0, 1], color='gray', linestyle='--')
+        plt.xlim([0.0, 1.0])
+        plt.ylim([0.0, 1.05])
+        plt.xlabel('False Positive Rate')
+        plt.ylabel('True Positive Rate')
+        plt.title('Receiver Operating Characteristic (ROC) Curve\nHackathon Results')
+        plt.legend(loc="lower right")
+        rocPlot = plt.gcf()
+        # plt.show()
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            try:
+                st.pyplot(cmPlot)
+            except:
+                st.write("Cannot calculate confusion matrix. Please ensure that the CSV file has at least one synthetic and human text")
+        with col2:
+            try:
+                st.pyplot(rocPlot)
+            except:
+                st.write("Cannot calculate ROC plot. Please ensure that the CSV file has at least one synthetic and human text")
