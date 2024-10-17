@@ -122,7 +122,7 @@ with tab2:
         - Label human text as 1
     - After uploading the CSV file, you will be prompted to select the columns for the text and type data
     """)
-    uploaded_file = st.file_uploader("CSV upload", type="csv")
+    uploaded_file = st.file_uploader("CSV File Upload", type="csv")
     if uploaded_file is not None:
     # Read the CSV file
         df = pd.read_csv(uploaded_file)

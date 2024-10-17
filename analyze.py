@@ -95,6 +95,9 @@ def processNewDataWithLabels(textColumn, targetColumn, onlyOne=False, predict_df
     predict_df = predict_df.rename(columns={textColumn: "text"})
     predict_df = predict_df.rename(columns={targetColumn: "target"})
 
+    # Make a copy of the original text column before any modifications
+    predict_df['Text'] = predict_df['text'].copy()
+
     # Remove stop words
     predict_df['text'] = predict_df['text'].apply(lambda x: ' '.join([word for word in x.split() if word not in (stop_words)]))
     # Convert numbers to <NUM>
@@ -155,7 +158,7 @@ def processNewDataWithLabels(textColumn, targetColumn, onlyOne=False, predict_df
         plt.ylim([0.0, 1.05])
         plt.xlabel('False Positive Rate')
         plt.ylabel('True Positive Rate')
-        plt.title('Receiver Operating Characteristic (ROC) Curve\nHackathon Results')
+        plt.title('Receiver Operating Characteristic (ROC) Curve\nSynthetic vs Human Written Results')
         plt.legend(loc="lower right")
         rocPlot = plt.gcf()
         # plt.show()
@@ -172,3 +175,15 @@ def processNewDataWithLabels(textColumn, targetColumn, onlyOne=False, predict_df
                 st.pyplot(rocPlot)
             except:
                 st.write("Cannot calculate ROC plot. Please ensure that the CSV file has at least one synthetic and human text")
+
+        # Add the predicted labels to the original dataframe
+        predict_df['Predicted'] = predicted_labels
+        predict_df['Actual'] = predict_labels
+
+        # Add a column indicating whether the prediction was correct
+        predict_df['Result'] = np.where(predict_df['Predicted'] == predict_df['Actual'], 'Correct', 'Incorrect')
+        # Convert 'actual' and 'predicted' columns from 0/1 to 'Synthetic'/'Human'
+        predict_df['Actual'] = predict_df['Actual'].map({0: 'Synthetic', 1: 'Human'})
+        predict_df['Predicted'] = predict_df['Predicted'].map({0: 'Synthetic', 1: 'Human'})
+        st.write("Model Predictions and Results:")
+        st.dataframe(predict_df[['Result', 'Actual', 'Predicted', 'Text']].sort_values(by='Result', ascending=False))
