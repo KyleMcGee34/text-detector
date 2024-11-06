@@ -1,0 +1,1 @@
+{"padding_value": 300, "embedding_value": 150, "drop_rate": 0.6, "l2_regularization": 0.001, "bidirectional": true, "use_additional_dense": true, "lstm_layers": 128}

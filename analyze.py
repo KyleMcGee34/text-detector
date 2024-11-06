@@ -52,7 +52,7 @@ def load_parms(path):
     return parm_dict
 
 @st.cache_data
-def analyze_text(text):
+def analyze_text(text, tokenizer_path, parm_path, model_path):
     # Create dataframe
     data = {'text': [text]}
     predict_df = pd.DataFrame(data)
@@ -65,11 +65,11 @@ def analyze_text(text):
     predict_df['text'] = predict_df['text'].apply(lowercase_text)
 
     # Load tokenizer
-    loaded_tokenizer = load_tokenizer('Models/ProfileTextDetector/Tokenizer.json')
+    loaded_tokenizer = load_tokenizer(tokenizer_path)
     # Load parms
-    loaded_parm_dict = load_parms('Models/ProfileTextDetector/Parms.json')
+    loaded_parm_dict = load_parms(parm_path)
     # Load model
-    loaded_model = get_model('Models/ProfileTextDetector/Model.keras')
+    loaded_model = get_model(model_path)
 
     # Process text before prediction
     predict_texts = predict_df['text'].tolist()
@@ -90,7 +90,7 @@ def analyze_text(text):
         final_label = 'Synthetic'
     return final_label
 
-def processNewDataWithLabels(textColumn, targetColumn, onlyOne=False, predict_df=None, plotROC=True):
+def processNewDataWithLabels(textColumn, targetColumn, onlyOne=False, predict_df=None, plotROC=True, tokenizer_path=None, parm_path=None, model_path=None):
 
     predict_df = predict_df.rename(columns={textColumn: "text"})
     predict_df = predict_df.rename(columns={targetColumn: "target"})
@@ -109,16 +109,16 @@ def processNewDataWithLabels(textColumn, targetColumn, onlyOne=False, predict_df
     predict_labels = np.array(predict_df['target'].tolist())
 
     # Tokenization
-    loaded_tokenizer = load_tokenizer('Models/ProfileTextDetector/Tokenizer.json')
+    loaded_tokenizer = load_tokenizer(tokenizer_path)
     predict_sequences = loaded_tokenizer.texts_to_sequences(predict_texts)
 
     # Padding
-    loaded_parm_dict = load_parms('Models/ProfileTextDetector/Parms.json')
+    loaded_parm_dict = load_parms(parm_path)
     max_length = loaded_parm_dict['padding_value']
     predict_padded_sequences  = np.array(tf.keras.preprocessing.sequence.pad_sequences(predict_sequences, maxlen=max_length, padding='post'))
 
     # Get the predicted probabilities for each class
-    loaded_model = get_model('Models/ProfileTextDetector/Model.keras')
+    loaded_model = get_model(model_path)
     predicted_probabilities = loaded_model.predict(predict_padded_sequences)
 
     # Convert the predicted probabilities to class labels (0 or 1)
