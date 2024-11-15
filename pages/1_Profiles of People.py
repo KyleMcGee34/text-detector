@@ -128,7 +128,9 @@ with tab2:
     """)
     uploaded_file = st.file_uploader("CSV File Upload", type="csv")
     if uploaded_file is not None:
-    # Read the CSV file
+        # Extract the filename without extension
+        file_name = os.path.splitext(uploaded_file.name)[0]
+        # Read the CSV file
         df = pd.read_csv(uploaded_file)
 
         # Display the dataframe
@@ -152,4 +154,5 @@ with tab2:
         processNewDataWithLabels(text_column, target_column, predict_df=df,
                                  tokenizer_path='Models/ProfileTextDetector/Tokenizer.json',
                                  parm_path='Models/ProfileTextDetector/Parms.json',
-                                 model_path='Models/ProfileTextDetector/Model.keras')
+                                 model_path='Models/ProfileTextDetector/Model.keras',
+                                 file_name=file_name)

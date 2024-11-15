@@ -9,6 +9,9 @@ import pandas as pd
 import streamlit as st
 from sklearn.metrics import confusion_matrix, accuracy_score, roc_auc_score, ConfusionMatrixDisplay, classification_report, roc_curve, auc
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
+import tempfile
+import base64
 
 nltk.download('stopwords')
 stop_words = set(stopwords.words('english'))
@@ -90,7 +93,7 @@ def analyze_text(text, tokenizer_path, parm_path, model_path):
         final_label = 'Synthetic'
     return final_label
 
-def processNewDataWithLabels(textColumn, targetColumn, onlyOne=False, predict_df=None, plotROC=True, tokenizer_path=None, parm_path=None, model_path=None):
+def processNewDataWithLabels(textColumn, targetColumn, onlyOne=False, predict_df=None, plotROC=True, tokenizer_path=None, parm_path=None, model_path=None, file_name="output"):
 
     predict_df = predict_df.rename(columns={textColumn: "text"})
     predict_df = predict_df.rename(columns={targetColumn: "target"})
@@ -175,6 +178,39 @@ def processNewDataWithLabels(textColumn, targetColumn, onlyOne=False, predict_df
                 st.pyplot(rocPlot)
             except:
                 st.write("Cannot calculate ROC plot. Please ensure that the CSV file has at least one synthetic and human text")
+
+        # Create a combined figure with both plots for the PDF
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
+        # fig.suptitle(f"{file_name}_analysis", fontsize=20)  # Add the main title at the top
+        disp.plot(cmap=plt.cm.Blues, ax=ax1)
+        ax1.set_xlabel("Predicted labels")
+        ax1.set_ylabel("True labels")
+        ax1.set_title("Confusion Matrix")
+
+        ax2.plot(fpr, tpr, color='blue', lw=2, label='ROC curve (area = %0.2f)' % roc_auc)
+        ax2.plot([0, 1], [0, 1], color='gray', linestyle='--')
+        ax2.set_xlim([0.0, 1.0])
+        ax2.set_ylim([0.0, 1.05])
+        ax2.set_xlabel('False Positive Rate')
+        ax2.set_ylabel('True Positive Rate')
+        ax2.set_title('ROC Curve')
+        ax2.legend(loc="lower right")
+
+        # Save the combined figure to a PDF
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmpfile:
+            with PdfPages(tmpfile.name) as pdf:
+                pdf.savefig(fig)  # Save the single-page combined figure
+            pdf_path = tmpfile.name
+
+        # Format the download name using the uploaded file name
+        download_filename = f"{file_name}_analysis.pdf"
+
+        # Provide download link for the PDF
+        with open(pdf_path, "rb") as pdf_file:
+            pdf_data = pdf_file.read()
+            b64 = base64.b64encode(pdf_data).decode()
+            href = f'<a href="data:application/octet-stream;base64,{b64}" download="{download_filename}">Download PDF of Plots</a>'
+            st.markdown(href, unsafe_allow_html=True)
 
         # Add the predicted labels to the original dataframe
         predict_df['Predicted'] = predicted_labels
