@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import tempfile
 import base64
+import plotly.graph_objects as go
 
 nltk.download('stopwords')
 stop_words = set(stopwords.words('english'))
@@ -36,6 +37,34 @@ def lowercase_text(text):
     
     return lowercased_text
 
+def create_circular_chart(label, value, color):
+    """Creates a smaller circular chart using Plotly."""
+    fig = go.Figure(
+        go.Pie(
+            values=[value, 100 - value],
+            labels=["", ""],
+            hole=0.8,  # Larger hole for a smaller overall size
+            textinfo="none",
+            marker=dict(colors=[color, "#E8E8E8"]),
+            sort=False
+        )
+    )
+    fig.update_layout(
+        showlegend=False,
+        margin=dict(t=0, b=0, l=0, r=0),  # Tight margins to make the chart smaller
+        width=125,  # Set a fixed width for the chart
+        height=125,  # Set a fixed height for the chart
+        annotations=[
+            dict(
+                text=f"{value}%<br>{label}",
+                x=0.5,
+                y=0.5,
+                font=dict(size=16, color=color),  # Smaller font size for percentage
+                showarrow=False
+            )
+        ]
+    )
+    return fig
 @st.cache_resource
 def get_model(path):
     loadedModel = tf.keras.models.load_model(path)
@@ -81,8 +110,22 @@ def analyze_text(text, tokenizer_path, parm_path, model_path):
     predict_padded_sequences  = np.array(tf.keras.preprocessing.sequence.pad_sequences(predict_sequences, maxlen=max_length, padding='post'))
     # Prediction starts here
     predicted_probability = loaded_model.predict(predict_padded_sequences)
-    st.progress(text=f"Human Likelihood :red-background[{round(predicted_probability[0, 0] * 100, 1)}%]",value=int(predicted_probability[0, 0] * 100))
-    st.progress(text=f"Synthetic Likelihood :red-background[{round((1 - predicted_probability[0, 0]) * 100, 1)}%]",value=int((1 - predicted_probability[0, 0]) * 100))
+    human_likelihood = round(predicted_probability[0, 0] * 100, 1)
+    synthetic_likelihood= round((1 - predicted_probability[0, 0]) * 100, 1)
+    # Use columns to display the charts side by side
+    col1, col2 = st.columns(2)
+    with col1:
+        st.plotly_chart(
+            create_circular_chart("Human", human_likelihood, "#1f77b4"),
+            use_container_width=True
+        )
+    with col2:
+        st.plotly_chart(
+            create_circular_chart("Synthetic", synthetic_likelihood, "#ff7f0e"),
+            use_container_width=True
+        )
+    # st.progress(text=f"Human Likelihood :red-background[{round(predicted_probability[0, 0] * 100, 1)}%]",value=int(predicted_probability[0, 0] * 100))
+    # st.progress(text=f"Synthetic Likelihood :red-background[{round((1 - predicted_probability[0, 0]) * 100, 1)}%]",value=int((1 - predicted_probability[0, 0]) * 100))
     # Convert prediction to int
     predicted_label = (predicted_probability > 0.5).astype(int)
     # Return final output
@@ -145,10 +188,13 @@ def processNewDataWithLabels(textColumn, targetColumn, onlyOne=False, predict_df
 
     if plotROC:
         # Extract the probabilities for the positive class
-        positive_class_probabilities = predicted_probabilities[:, 0]  # Use index 0 to extract probabilities for the positive class
-
+        # print(predicted_probabilities[:5])  # Inspect first few rows
+        # positive_class_probabilities = predicted_probabilities[:, 0]  # Use index 0 to extract probabilities for the positive class
+        positive_class_probabilities = predicted_probabilities  # Use index 0 to extract probabilities for the positive class
         # Calculate the false positive rate (fpr) and true positive rate (tpr) for different thresholds
         fpr, tpr, thresholds = roc_curve(predict_labels, positive_class_probabilities)
+        # for true_label, pred_prob in zip(predict_labels, predicted_probabilities):
+            # print(f"True Label: {true_label}, Predicted Probability: {pred_prob}")
 
         # Calculate the area under the ROC curve (AUC)
         roc_auc = auc(fpr, tpr)
