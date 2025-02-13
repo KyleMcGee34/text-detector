@@ -136,6 +136,51 @@ def analyze_text(text, tokenizer_path, parm_path, model_path):
         final_label = 'Synthetic'
     return final_label
 
+def analyze_classification(text, tokenizer_path, model_path, max_length=512, threshold=0.90):
+    # Create dataframe
+    data = {'text': [text]}
+    predict_df = pd.DataFrame(data)
+
+    #Rremove stop words
+    predict_df['text'] = predict_df['text'].apply(lambda x: ' '.join([word for word in x.split() if word not in (stop_words)]))
+    # Convert numbers to <NUM>
+    predict_df['text'] = predict_df['text'].apply(replace_numerical_values)
+    # Lower case everything
+    predict_df['text'] = predict_df['text'].apply(lowercase_text)
+
+    # Load tokenizer
+    loaded_tokenizer = load_tokenizer(tokenizer_path)
+    # Load model
+    loaded_model = get_model(model_path)
+
+    # Convert text to sequence
+    sequence = loaded_tokenizer.texts_to_sequences(predict_df['text'].tolist())
+    
+    # Pad the sequence
+    padded_sequence = tf.keras.preprocessing.sequence.pad_sequences(sequence, maxlen=max_length, padding='post', truncating='post')
+    
+    # Get prediction probabilities
+    probabilities = loaded_model.predict(padded_sequence)
+    
+    # Get the highest probability and corresponding class
+    max_prob = np.max(probabilities)
+    predicted_class = np.argmax(probabilities, axis=1)[0]
+    
+    class_mapping = {
+    0: 'CNN',
+    1: 'neuters',
+    2: 'csmonitor',
+    3: 'dailymail',
+    4: 'nytimes'
+    }
+
+    # Check if probability meets the threshold
+    if max_prob >= threshold:
+        return class_mapping.get(predicted_class, "Unknown source")  # Use mapping to return the site name
+    else:
+        return "We cannot accurately determine where this text came from"
+
+
 def processNewDataWithLabels(textColumn, targetColumn, onlyOne=False, predict_df=None, plotROC=True, tokenizer_path=None, parm_path=None, model_path=None, file_name="output"):
 
     predict_df = predict_df.rename(columns={textColumn: "text"})
