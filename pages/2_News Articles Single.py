@@ -3,7 +3,7 @@ import subprocess
 import os
 import csv
 import re
-from analyze import analyze_text, processNewDataWithLabels
+from analyze import analyze_text, processNewDataWithLabels, analyze_classification
 import pandas as pd
 
 st.set_page_config(
@@ -25,7 +25,7 @@ st.markdown(
 col1, col2, col3 = st.columns([1, 1.5, 1])
 with col3:
     with st.expander("Model Details", icon="🚨"):
-        data = [['1042', 'Synthetic'], ['1042', 'Human']]
+        data = [['2492', 'Synthetic'], ['2492', 'Human']]
         df = pd.DataFrame(data, columns=['Count', 'Type'])
         st.write('Training data counts:')
         st.dataframe(df,hide_index=True)
@@ -38,8 +38,6 @@ with col3:
                 - phi3:14b 
                 
                 - hermes3:70b
-                
-                - facebook_opt-6.7b
                 
                 - gemma2:27b
                 
@@ -101,7 +99,22 @@ with col1:
             """,
             unsafe_allow_html=True
         )
-        # st.write(f"The text you provided is assumed to be :blue-background[{final_label}]")
+        if final_label == "Human":
+            final_classification = analyze_classification(text, 'Models/NewsArticleTestClassifier/NewsArticlesClassification.json', 'Models/NewsArticleTestClassifier/NewsArticlesClassification.keras')
+            if final_classification != "We cannot accurately determine where this text came from":
+                final_classification_output = "This text most likely came from " + final_classification
+            else:
+                final_classification_output = final_classification
+            st.markdown(
+            f"""
+            <div style="text-align: center;">
+                <p>
+                    {final_classification_output}
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True
+            )
         correct = st.radio('Was the models prediction correct?',
                         ['Yes','No','Not Sure'],
                         index=None)
