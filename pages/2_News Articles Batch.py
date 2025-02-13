@@ -25,7 +25,7 @@ st.markdown(
 col1, col2, col3 = st.columns([1.5, 1.5, 1])
 with col3:
     with st.expander("Model Details", icon="🚨"):
-        data = [['1042', 'Synthetic'], ['1042', 'Human']]
+        data = [['2492', 'Synthetic'], ['2492', 'Human']]
         df = pd.DataFrame(data, columns=['Count', 'Type'])
         st.write('Training data counts:')
         st.dataframe(df,hide_index=True)
@@ -37,9 +37,7 @@ with col3:
                 
                 - phi3:14b 
                 
-                - hermes3:70b
-                
-                - facebook_opt-6.7b
+                - hermes3:70b                
                 
                 - gemma2:27b
                 
