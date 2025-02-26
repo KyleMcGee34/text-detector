@@ -1,3 +1,2 @@
-*.keras filter=lfs diff=lfs merge=lfs -text
 Models/NewsArticleTextDetector/Model.keras filter=lfs diff=lfs merge=lfs -text
 Models/NewsArticleTestClassifier/NewsArticlesClassification.keras filter=lfs diff=lfs merge=lfs -text
