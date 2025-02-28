@@ -43,7 +43,7 @@ def create_circular_chart(label, value, color):
         go.Pie(
             values=[value, 100 - value],
             labels=["", ""],
-            hole=0.8,  # Larger hole for a smaller overall size
+            hole=0.90,  # Larger hole for a smaller overall size
             textinfo="none",
             marker=dict(colors=[color, "#E8E8E8"]),
             sort=False
@@ -52,14 +52,14 @@ def create_circular_chart(label, value, color):
     fig.update_layout(
         showlegend=False,
         margin=dict(t=0, b=0, l=0, r=0),  # Tight margins to make the chart smaller
-        width=125,  # Set a fixed width for the chart
-        height=125,  # Set a fixed height for the chart
+        width=100,  # Set a fixed width for the chart
+        height=100,  # Set a fixed height for the chart
         annotations=[
             dict(
                 text=f"{value}%<br>{label}",
                 x=0.5,
                 y=0.5,
-                font=dict(size=16, color=color),  # Smaller font size for percentage
+                font=dict(size=13, color=color),  # Smaller font size for percentage
                 showarrow=False
             )
         ]
@@ -165,7 +165,7 @@ def analyze_classification(text, tokenizer_path, model_path, max_length=512, thr
     # Get the highest probability and corresponding class
     max_prob = np.max(probabilities)
     predicted_class = np.argmax(probabilities, axis=1)[0]
-    
+
     class_mapping = {
     0: 'CNN',
     1: 'neuters',
@@ -173,7 +173,12 @@ def analyze_classification(text, tokenizer_path, model_path, max_length=512, thr
     3: 'dailymail',
     4: 'nytimes'
     }
+    class_map = class_mapping.get(predicted_class, "Unknown source")  # Use mapping to return the site name
 
+    st.plotly_chart(
+        create_circular_chart(class_map, round(max_prob * 100, 1), "#1f77b4"),
+        use_container_width=True
+    )
     # Check if probability meets the threshold
     if max_prob >= threshold:
         return class_mapping.get(predicted_class, "Unknown source")  # Use mapping to return the site name
