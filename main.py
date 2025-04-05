@@ -12,12 +12,12 @@ button_style = """
         display: flex;
         justify-content: center; /* Center align all buttons */
         align-items: center; /* Vertically align buttons */
-        gap: 100px; /* Specify spacing between buttons in pixels */
+        gap: 30px; /* Specify spacing between buttons in pixels */
         padding: 20px; /* Optional padding around the container */
     }
     .rectangle-button {
         display: inline-block;
-        width: 350px; /* Adjust width */
+        width: 30%; /* Adjust width */
         height: 400px; /* Adjust height for multi-line text */
         background-color: #FF9800; /* Orange background */
         color: white; /* White text for button */
@@ -99,6 +99,12 @@ with tab1:
                 <span class="sub-text">Single Text Evaluation</span>
                 </div>
             </a>
+            <a href="/YouTube_Bot_Classifier" class="rectangle-button">
+                <div class="detector-title">YouTube Bot Classifier
+                <br>
+                <span class="sub-text">Single Text Evaluation</span>
+                </div>
+            </a>            
         </div>
         """,
         unsafe_allow_html=True
