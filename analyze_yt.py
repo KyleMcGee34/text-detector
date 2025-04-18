@@ -2,6 +2,18 @@ import pandas as pd
 from nltk.stem import PorterStemmer
 from nltk.corpus import stopwords
 import re
+import joblib  # for loading .pkl
+import torch
+
+vectorizer_path = 'Models/YouTubeCommentDetector/vectorizer.pkl'
+model_path = 'Models/YouTubeCommentDetector/full_model.pt'
+# Load vectorizer
+vectorizer = joblib.load(vectorizer_path)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# Load full model
+model = torch.load(model_path, map_location=device)
+model.eval()
 
 def analyze_text(text, timestamp, date, username, videoId):
     # Preprocess YouTube Bot Single Text
@@ -22,6 +34,25 @@ def analyze_text(text, timestamp, date, username, videoId):
     # Join back into one string
     final_cleaned_text = " ".join(clean_comments)
 
+    # Vectorize the cleaned text
+    X_vectorized = vectorizer.transform([final_cleaned_text])
+
+    # Convert to tensor if necessary
+    X_tensor = torch.tensor(X_vectorized.toarray(), dtype=torch.float32).to(device)
+
+    # Make prediction
+    with torch.no_grad():
+        output = model(X_tensor)                      # Log probabilities
+        predicted_class = torch.argmax(output, dim=1) # 0 or 1
+        prediction = predicted_class.cpu().numpy()    # Convert to numpy if needed
+
+    final_prediction = prediction[0]
+
+    if final_prediction == 1:
+        final_label = 'Human'
+    if final_prediction == 0:
+        final_label = 'Synthetic'
+
     data = {'Text': [final_cleaned_text],
             'Timestamp': [timestamp],
             'Date': [date],
@@ -29,4 +60,5 @@ def analyze_text(text, timestamp, date, username, videoId):
             'VideoId': [videoId]}
     predict_df = pd.DataFrame(data)
 
-    return predict_df
+
+    return final_label

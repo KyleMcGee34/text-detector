@@ -58,8 +58,19 @@ with col1:
             """,
             unsafe_allow_html=True
         )
-        st.markdown("Below is a dataframe that can be used as inputs into an already trained model")
         final_label = analyze_text(text, timestamp, date, username, videoId)
-        # st.markdown(final_label.loc[0, 'text'])
-        st.dataframe(final_label)
+        background_color = "blue" if final_label == "Human" else "red"
+        st.markdown(
+            f"""
+            <div style="text-align: center;">
+                <p>
+                    The text you provided is assumed to be 
+                    <span style="background-color: {background_color}; color: white; padding: 5px; border-radius: 5px;">
+                        {final_label}
+                    </span>
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
         st.button('Reset', on_click=set_state, args=[0])
