@@ -4,6 +4,7 @@ from nltk.corpus import stopwords
 import re
 import joblib  # for loading .pkl
 import torch
+import nltk
 
 vectorizer_path = 'Models/YouTubeCommentDetector/vectorizer.pkl'
 model_path = 'Models/YouTubeCommentDetector/full_model.pt'
@@ -15,6 +16,9 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = torch.load(model_path, map_location=device)
 model.eval()
 
+nltk.download('stopwords')
+stop_words = set(stopwords.words('english'))
+
 def analyze_text(text, timestamp, date, username, videoId):
     # Preprocess YouTube Bot Single Text
     cleaned_text = re.sub("[^a-zA-Z]", " ", text) # we are only going to keep a-z A-Z letters
@@ -22,7 +26,6 @@ def analyze_text(text, timestamp, date, username, videoId):
     cleaned_text = cleaned_text.split() # splits every word by space. we now have individual words
 
     ps = PorterStemmer()
-    stop_words = set(stopwords.words('english'))
 
     # Remove stopwords and apply stemming
     clean_comments = []
