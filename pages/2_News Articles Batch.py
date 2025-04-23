@@ -43,6 +43,19 @@ with col3:
                 
                 - llama3.1:70b
         ''')
+        st.write('''
+                 The websites used in this model are:
+                 
+                 - [CNN Lite](https://lite.cnn.com/)
+
+                 - [NYT](https://www.nytimes.com/)
+                 
+                 - [csmonitor](https://www.csmonitor.com/layout/set/text/textedition)
+
+                 - [Daily Mail](https://www.dailymail.co.uk/textbased/channel-561/index.html)
+
+                 - [neuters](https://neuters.de)
+        ''')          
 with col2:
     st.markdown("When uploading a file please format it in the following way:")
     st.markdown("""
