@@ -3,7 +3,7 @@ import subprocess
 import os
 import csv
 import re
-from analyze import analyze_text, processNewDataWithLabels, analyze_classification
+from analyze import analyze_text, processNewDataWithLabels, analyze_classification, analyze_classificationSynthetic
 import pandas as pd
 
 st.set_page_config(
@@ -121,7 +121,7 @@ with col1:
             if final_classification != "We cannot accurately determine where this text came from":
                 final_classification_output = "This text most likely came from " + final_classification
             else:
-                final_classification_output = final_classification + " using a 90% confidence level"
+                final_classification_output = final_classification + " using a 50% confidence level"
             st.markdown(
             f"""
             <div style="text-align: center;">
@@ -132,6 +132,23 @@ with col1:
             """,
             unsafe_allow_html=True
             )
+        if final_label == "Synthetic":
+            final_classification = analyze_classificationSynthetic(text, 'Models/NewsArticleTestClassifier/NewsArticlesClassificationSyntheticModels.json', 'Models/NewsArticleTestClassifier/NewsArticlesClassificationSyntheticModels.keras')
+            if final_classification != "We cannot accurately determine where this text came from":
+                final_classification_output = "This text most likely came from " + final_classification
+            else:
+                final_classification_output = final_classification + " using a 50% confidence level"
+            st.markdown(
+            f"""
+            <div style="text-align: center;">
+                <p>
+                    {final_classification_output}
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True
+            )
+
         correct = st.radio('Was the models prediction correct?',
                         ['Yes','No','Not Sure'],
                         index=None)
