@@ -171,7 +171,8 @@ def analyze_classification(text, tokenizer_path, model_path, max_length=512, thr
     1: 'neuters',
     2: 'csmonitor',
     3: 'dailymail',
-    4: 'nytimes'
+    4: 'nytimes',
+    5: 'guardian'
     }
 
     # Extract labels and scores

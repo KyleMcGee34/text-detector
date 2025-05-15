@@ -25,7 +25,7 @@ st.markdown(
 col1, col2, col3 = st.columns([1.5, 1.5, 1])
 with col3:
     with st.expander("Model Details", icon="🚨"):
-        data = [['2492', 'Synthetic'], ['2492', 'Human']]
+        data = [['4293', 'Synthetic'], ['4290', 'Human']]
         df = pd.DataFrame(data, columns=['Count', 'Type'])
         st.write('Training data counts:')
         st.dataframe(df,hide_index=True)
@@ -49,6 +49,8 @@ with col3:
                  - [CNN Lite](https://lite.cnn.com/)
 
                  - [NYT](https://www.nytimes.com/)
+
+                 - [The Guardian](https://www.theguardian.com/us)
                  
                  - [csmonitor](https://www.csmonitor.com/layout/set/text/textedition)
 
